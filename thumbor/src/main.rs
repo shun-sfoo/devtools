@@ -1,4 +1,7 @@
+mod engine;
 mod pb;
+
+use pb::*;
 
 use std::{
     collections::hash_map::DefaultHasher,
@@ -14,9 +17,11 @@ use axum::{
     routing::get,
     AddExtensionLayer, Router,
 };
+
 use bytes::Bytes;
+use engine::{photon::Photon, Engine};
+use image::ImageOutputFormat;
 use lru::LruCache;
-use pb::*;
 use percent_encoding::{percent_decode_str, percent_encode, NON_ALPHANUMERIC};
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -63,7 +68,7 @@ async fn generate(
     Extension(cache): Extension<Cache>,
 ) -> Result<(HeaderMap, Vec<u8>), StatusCode> {
     let url = percent_decode_str(&url).decode_utf8_lossy();
-    let _spec: ImageSpec = spec
+    let spec: ImageSpec = spec
         .as_str()
         .try_into()
         .map_err(|_| StatusCode::BAD_REQUEST)?;
@@ -73,13 +78,21 @@ async fn generate(
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
-    // todo
+    let mut engine: Photon = data
+        .try_into()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    engine.apply(&spec.specs);
+
+    let image = engine.generate(ImageOutputFormat::Jpeg(85));
+
+    info!("Finished processing: image size {}", image.len());
 
     let mut headers = HeaderMap::new();
 
     headers.insert("content-type", HeaderValue::from_static("image/jpeg"));
 
-    Ok((headers, data.to_vec()))
+    Ok((headers, image))
 }
 
 #[instrument(level = "info", skip(cache))]
