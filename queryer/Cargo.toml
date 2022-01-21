@@ -5,11 +5,20 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[example]]
+name = "dialect"
+
+[[example]]
+name = "covid"
+
+[[example]]
+name = "covid1"
+
 [dependencies]
 anyhow = "1.0.52"
-async-trait = "0.1.52"  # 允许 trait 里有 async fn
-sqlparser = "0.13.0"  # SQL 解析器
-polars = { version = "0.18.0", features = ["json", "lazy"] }  # DataFrame 库
+async-trait = "0.1.52"
+sqlparser = "0.13.0"
+polars = { version = "0.15.0", features = ["json", "lazy"] }  # DataFrame 库
 reqwest = "0.11.9"
 tokio = { version = "1.15.0", features = ["fs"] }
 tracing = "0.1.29"

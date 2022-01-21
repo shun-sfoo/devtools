@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package abi; // 这个名字会被用作编译结果，prost 会产生：abi.rs
+package abi;
 
 // 一个 ImageSpec 是一个有序的数组，服务器按照 spec 的顺序处理
 message ImageSpec { repeated Spec specs = 1; }
