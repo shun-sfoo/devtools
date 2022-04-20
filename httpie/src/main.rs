@@ -21,14 +21,25 @@ struct Opts {
 
 #[derive(Parser, Debug)]
 enum SubCommand {
-    Get(Get),
-    Post(Post),
+    Get(Rep),
+    Post(Rep),
+    Delete(Rep),
+    Put(Rep),
 }
 
-#[derive(Parser, Debug)]
-struct Get {
-    #[clap(parse(try_from_str = parse_url))]
-    url: String,
+#[macro_export]
+macro_rules! do_repquest {
+    ($x:expr) => {{
+        async fn $x(client: Client, args: &Rep) -> Result<()> {
+            let mut body = HashMap::new();
+            for pair in args.body.iter() {
+                body.insert(&pair.k, &pair.v);
+            }
+
+            let resp = client.$x(&args.url).json(&body).send().await?;
+            Ok(print_resp(resp).await?)
+        }
+    }};
 }
 
 fn parse_url(s: &str) -> Result<String> {
@@ -37,7 +48,7 @@ fn parse_url(s: &str) -> Result<String> {
 }
 
 #[derive(Parser, Debug)]
-struct Post {
+struct Rep {
     #[clap(parse(try_from_str = parse_url))]
     url: String,
 
@@ -68,8 +79,10 @@ fn parse_kv_pair(s: &str) -> Result<KvPair> {
     Ok(s.parse()?)
 }
 
-async fn get(client: Client, args: &Get) -> Result<()> {
-    let resp = client.get(&args.url).send().await?;
+async fn get(client: Client, args: &Rep) -> Result<()> {
+    let query: Vec<(&String, &String)>;
+    query = args.body.iter().map(|pair| (&pair.k, &pair.v)).collect();
+    let resp = client.get(&args.url).query(&query).send().await?;
     Ok(print_resp(resp).await?)
 }
 
@@ -88,13 +101,33 @@ fn print_syntect(s: &str, ext: &str) {
     }
 }
 
-async fn post(client: Client, args: &Post) -> Result<()> {
+async fn post(client: Client, args: &Rep) -> Result<()> {
     let mut body = HashMap::new();
     for pair in args.body.iter() {
         body.insert(&pair.k, &pair.v);
     }
 
     let resp = client.post(&args.url).json(&body).send().await?;
+    Ok(print_resp(resp).await?)
+}
+
+async fn delete(client: Client, args: &Rep) -> Result<()> {
+    let mut body = HashMap::new();
+    for pair in args.body.iter() {
+        body.insert(&pair.k, &pair.v);
+    }
+
+    let resp = client.delete(&args.url).json(&body).send().await?;
+    Ok(print_resp(resp).await?)
+}
+
+async fn put(client: Client, args: &Rep) -> Result<()> {
+    let mut body = HashMap::new();
+    for pair in args.body.iter() {
+        body.insert(&pair.k, &pair.v);
+    }
+
+    let resp = client.put(&args.url).json(&body).send().await?;
     Ok(print_resp(resp).await?)
 }
 
@@ -148,6 +181,8 @@ async fn main() -> Result<()> {
     let result = match opts.subcmd {
         SubCommand::Get(ref args) => get(client, args).await?,
         SubCommand::Post(ref args) => post(client, args).await?,
+        SubCommand::Delete(ref args) => delete(client, args).await?,
+        SubCommand::Put(ref args) => put(client, args).await?,
     };
 
     Ok(result)
