@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Directory listing for /</title>
+
+    <style>
+      a {
+          text-decoration: none;
+          color: #4c7883;
+      }
+      a:hover, a:hover .directory, a:hover .file {
+          color: #ef482c;
+      }
+
+      .emoji-icon {
+          color: #6ea90c;
+          font-family: 'JetBrainsMono Nerd Font', 'Iosevka Nerd Font';
+      }
+
+      .directory {
+          color:#6ea90c;
+      }
+
+      .file {
+          color: #585a56;
+      }
+
+      #main {
+        width: 60%;
+        max-width: 1600px;
+        margin: 1em auto;
+      }
+
+      footer {
+          display: block;
+          padding: 40px
+          font-size: 12px;
+          text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <h1>
+        Directory listing for <span class="directory">/{{ cur_path }}</span>
+      </h1>
+      <hr />
+
+      <ol>
+        {% if cur_path != "" %}
+
+        <li><span class="emoji-icon"> </span> <a href="../">../</a></li>
+
+        {% endif %} {% for file in lister.files %} {% if file.is_file %}
+        <li>
+          <a
+            class="{{file.ext}}"
+            href="{{ file.path_uri|urlencode }}"
+            title="{{ file.last_modified|datetime }}"
+            ><span class="emoji-icon file"> </span> {{file.name}}</a
+          >
+        </li>
+
+        {% else %}
+        <li>
+          <a
+            href="{{ file.path_uri|urlencode }}/"
+            title="{{ file.last_modified|datetime }}"
+            ><span class="emoji-icon directory"> </span> {{file.name}}/</a
+          >
+        </li>
+        {% endif %} {% endfor %}
+      </ol>
+
+      <hr />
+    </div>
+
+    <footer>
+      Served with
+      <a rel="noopener noreferrer" href="https://github.com/ttys3/static-server"
+        >static-server</a
+      >
+    </footer>
+  </body>
+</html>

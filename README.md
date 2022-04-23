@@ -1,6 +1,10 @@
-# rust-cli
+# developer tools
 
-some simple cli tool written by rust
+## Wirrten by C
+
+### leptjson
+
+## Wirrten by Rust
 
 ## scrape-url
 
