@@ -42,7 +42,7 @@ struct Opt {
     root_dir: String,
 
     /// set the listen addr
-    #[clap(short = 'a', long = "addr", default_value = "127.0.0.1")]
+    #[clap(short = 'a', long = "addr", default_value = "0.0.0.0")]
     addr: String,
 
     /// set the listen port
@@ -88,7 +88,7 @@ async fn main() {
             tracing::debug_span!("client-addr", addr = %addr, user_agent=%user_agent)
         }));
 
-    let addr = std::net::IpAddr::from_str(opt.addr.as_str()).unwrap_or_else(|_| "127.0.0.1".parse().unwrap());
+    let addr = std::net::IpAddr::from_str(opt.addr.as_str()).unwrap_or_else(|_| "0.0.0.0".parse().unwrap());
 
     let sock_addr = SocketAddr::from((addr, opt.port));
 

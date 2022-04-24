@@ -1,0 +1,16 @@
+[package]
+name = "cdict"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "0.1.53"
+dotenv_codegen = "0.15.0"
+reqwest = "0.11.10"
+rust-crypto = "0.2.36"
+serde = { version = "1.0.136", features = ["derive"] }
+serde_json = "1.0.79"
+tokio = { version = "1.17.0", features = ["full"] }
+uuid = { version = "1.0.0", features = ["v4"] }
