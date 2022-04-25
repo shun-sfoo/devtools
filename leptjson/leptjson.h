@@ -4,6 +4,7 @@ typedef enum {
   LEPT_NULL,
   LEPT_TRUE,
   LEPT_FALSE,
+  LEPT_NUMBER,
 } lept_type;
 
 enum {
@@ -15,6 +16,7 @@ enum {
 
 typedef struct {
   lept_type type;
+  double n;
 } lept_value;
 
 typedef struct {
@@ -24,3 +26,5 @@ typedef struct {
 int lept_parse(lept_value* v, const char* json);
 
 lept_type lept_get_type(const lept_value* v);
+
+double lept_get_number(const lept_value* v);
