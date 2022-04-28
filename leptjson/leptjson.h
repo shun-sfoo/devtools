@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stddef.h>
+
 #define lept_init(v) \
   do { (v)->type = NULL; } while (0)
 
 #define lept_set_null(v) lept_free(v)
 
-#include <stddef.h>
 typedef enum {
   LEPT_NULL,
   LEPT_TRUE,
@@ -22,18 +23,20 @@ enum {
   LEPT_PARSE_NUMBER_TOO_BIG,
   LEPT_PARSE_MISS_QUOTATION_MARK,
   LEPT_PARSE_INVALID_STRING_ESCAPE,
-  LEPT_PARSE_INVALID_STRING_CHAR
+  LEPT_PARSE_INVALID_STRING_CHAR,
+  LEPT_PARSE_INVALID_UNICODE_HEX,
+  LEPT_PARSE_INVALID_UNICODE_SURROGATE
 };
 
 typedef struct {
-  lept_type type;
   union {
-    double n;
     struct {
-      char* s;
+      char*  s;
       size_t len;
     } s;
+    double n;
   } u;
+  lept_type type;
 } lept_value;
 
 void lept_free(lept_value* v);
