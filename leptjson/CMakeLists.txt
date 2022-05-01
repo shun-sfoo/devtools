@@ -4,7 +4,7 @@ set(CMAKE_C_COMPILER clang)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # add_compile_options(-Weverything -Werror -pedantic)
-add_compile_options(-Weverything -Wno-float-equal -Wno-int-conversion -Wno-sign-conversion)
+add_compile_options(-Weverything -Wno-float-equal -Wno-int-conversion -Wno-sign-conversion -Wno-switch-enum -Wno-shadow)
 
 project(leptjson_test LANGUAGES C)
 add_library(leptjson leptjson.c)
