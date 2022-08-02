@@ -1,4 +1,5 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::{fs::File, io::Write, net::SocketAddr, sync::Arc};
+use local_ip_address::local_ip;
 use tower_http::trace::TraceLayer;
 
 // use axum::{extract::Path as extractPath};
@@ -8,10 +9,10 @@ use askama::Template;
 
 use axum::{
     body::{Body, BoxBody},
-    extract::Extension,
+    extract::{Extension, Multipart},
     http::{header, HeaderValue, Request, Response, StatusCode},
     response::{Html, IntoResponse},
-    routing::get,
+    routing::{get, post},
     Router,
 };
 
@@ -79,6 +80,7 @@ async fn main() {
     let app = Router::new()
         .route("/favicon.ico", get(favicon))
         .route("/healthz", get(health_check))
+        .route("/upload", post(upload))
         .fallback(get(index_or_content))
         .layer(Extension(Arc::new(StaticServerConfig { root_dir })))
         .layer(TraceLayer::new_for_http().make_span_with(|request: &Request<Body>| {
@@ -91,8 +93,11 @@ async fn main() {
     let addr = std::net::IpAddr::from_str(opt.addr.as_str()).unwrap_or_else(|_| "0.0.0.0".parse().unwrap());
 
     let sock_addr = SocketAddr::from((addr, opt.port));
+    let remote_addr = SocketAddr::from((local_ip().unwrap(), opt.port) );
 
-    tracing::info!("listening on http://{}", sock_addr);
+    tracing::info!("local ip is http://{}", sock_addr);
+    tracing::info!("remote ip is http://{}", remote_addr);
+
 
     axum::Server::bind(&sock_addr)
         .serve(app.into_make_service_with_connect_info::<SocketAddr>())
@@ -112,6 +117,17 @@ async fn favicon() -> impl IntoResponse {
     ([(header::CONTENT_TYPE, HeaderValue::from_static("image/png"))], pixel_favicon)
 }
 
+async fn upload(mut multipart: Multipart) -> impl IntoResponse {
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let name = field.name().unwrap().to_string();
+        let data = field.bytes().await.unwrap();
+
+        let mut file = File::create(name).unwrap();
+        file.write_all(&data).unwrap();
+    }
+
+    "upload success"
+}
 // Request<Body> used an extractors cannot be combined with other unless Request<Body> is the very last extractor.
 // see https://docs.rs/axum/latest/axum/extract/index.html#applying-multiple-extractors
 // see https://github.com/tokio-rs/axum/discussions/583#discussioncomment-1739582

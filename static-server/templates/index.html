@@ -21,7 +21,6 @@
       .directory {
           color:#6ea90c;
       }
-
       .file {
           color: #585a56;
       }
@@ -38,15 +37,64 @@
           font-size: 12px;
           text-align: center;
       }
+
+      #bar-wrap {
+        width : 500px;
+        height: 30px;
+        border: 1px solid green;
+      }
+
+      #bar {
+        width: 0px;
+        height: 30px;
+        background: green;
+      }
     </style>
+    <script type="text/javascript">
+      function handleFiles(files) {
+        console.log("file", files);
+        const uri = "/upload";
+        const xhr = new XMLHttpRequest();
+        const fd = new FormData();
+        xhr.open("POST", uri, true);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == 4) {
+            document.getElementById("percent").innerHTML = this.responseText;
+          }
+        };
+
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            var percent = Math.floor((event.loaded / event.total) * 100);
+            console.log(percent);
+            document.getElementById("bar").style.width = percent + "%";
+            document.getElementById("percent").innerHTML =
+              Math.floor(percent) + "%";
+          }
+        };
+
+        for (let i = 0, numFiles = files.length; i < numFiles; i++) {
+          fd.append(files[i].name, files[i]);
+        }
+
+        xhr.send(fd);
+      }
+    </script>
   </head>
   <body>
     <div id="main">
       <h1>
         Directory listing for <span class="directory">/{{ cur_path }}</span>
       </h1>
+      <div id="bar-wrap"><div id="bar"></div></div>
+      <span id="percent"></span><br />
+      <input
+        type="file"
+        id="input"
+        multiple
+        onchange="handleFiles(this.files)"
+      />
       <hr />
-
       <ol>
         {% if cur_path != "" %}
 
